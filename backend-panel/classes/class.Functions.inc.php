@@ -56,6 +56,34 @@ class Functions extends Database
     }
 
 
+    public function insertLastInsertId($tableName = "", $params = array())
+    {
+        if (!empty($tableName) && !empty($params)) {
+
+
+            $this->tableName = $tableName;
+
+            $keys   = array_keys($params);
+            $values = array_values($params);
+
+            // $data = array();
+
+            $keys   =  implode(', ', $keys);
+            $values =  implode("','", $values);
+
+            $sql    = 'INSERT INTO ' . $this->tableName . ' (' . $keys . ') VALUES (' . "'$values'" . ') ';
+
+            if ($this->conn->exec($sql)) {
+                return $this->conn->lastInsertId();
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+
+
     /**
      * udpate student function
      *

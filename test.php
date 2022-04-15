@@ -10,18 +10,15 @@ $allCat = $fun->showAllData('category');
 $subCat = $fun->showAllData('sub_category');
 $postData = $fun->sqlData(
     "SELECT post.*, meta_data.*, category.*, sub_category.*, job_posting_schema.* FROM post 
-LEFT JOIN meta_data ON post.id = meta_data.post_id 
+LEFT JOIN meta_data ON post.meta_data_id = meta_data.post_id 
 LEFT JOIN category ON post.cat_id = category.id 
 LEFT JOIN sub_category ON post.sub_cat_id = sub_category.id 
-LEFT JOIN job_posting_schema ON post.id = job_posting_schema.post_id"
+LEFT JOIN job_posting_schema ON post.job_schema_id = job_posting_schema.post_id"
 );
-
-echo "<pre>";
-print_r($postData);
-die();
 
 
 //include("../../includes/nav.inc.php");
+
 $post_Id = "";
 $metaData_Id = "";
 $schemaData_Id = "";
@@ -29,29 +26,6 @@ $tagData_Id = "";
 
 if (isset($_POST['submit'])) {
     $unique_id_for_all = uniqid() . time();
-
-    if (isset($_POST['cat_id']) && isset($_POST['sub_cat_id'])) {
-        $cat_id = $_POST['cat_id'];
-        $sub_cat_id = $_POST['sub_cat_id'];
-    }
-
-    if (isset($_POST['p_title']) && isset($_POST['p_body'])) {
-        $p_title = $_POST['p_title'];
-        $p_body = $_POST['p_body'];
-
-        $p_param = array(
-            'cat_id' => $cat_id,
-            'sub_cat_id' => $sub_cat_id,
-            'user_id' => 1, // replace with user $_SESSION['id']
-            'title' => $p_title,
-            'body' => $p_body,
-            'status' => 1
-        );
-
-        $post_Id =  $fun->insertLastInsertId('post', $p_param);
-    }
-
-
     if (isset($_POST['s_title']) && isset($_POST['s_body'])) {
         $s_title = $_POST['s_title'];
         $s_body = $_POST['s_body'];
@@ -61,7 +35,7 @@ if (isset($_POST['submit'])) {
         $s_posted_date = $_POST['s_posted_date'];
         $s_expiry_date = $_POST['s_expiry_date'];
         $s_unpublish_when_expiry = $_POST['s_unpublish_when_expiry'];
-        $s_emp_type_full_time = 'yes';
+        $s_emp_type_full_time = $_POST['s_emp_type_full_time'];
         $s_hiring_org_name = $_POST['s_hiring_org_name'];
         $s_hiring_org_url = $_POST['s_hiring_org_url'];
         $s_hiring_org_logo = $_POST['s_hiring_org_logo'];
@@ -75,7 +49,7 @@ if (isset($_POST['submit'])) {
 
         $s_param = array(
 
-            'post_id' => $post_Id,
+            'post_id' => $unique_id_for_all,
             's_title' => $s_title,
             's_body' => $s_body,
             'sal_currency' => $s_currency,
@@ -96,11 +70,14 @@ if (isset($_POST['submit'])) {
             'country' => $s_country,
             'status' => 1
         );
-        $schemaData_Id =  $fun->insertLastInsertId('job_posting_schema', $s_param);
+        $fun->insert('job_posting_schema', $s_param);
     }
 
 
-
+    if (isset($_POST['cat_id']) && isset($_POST['sub_cat_id'])) {
+        $cat_id = $_POST['cat_id'];
+        $sub_cat_id = $_POST['sub_cat_id'];
+    }
 
     if (isset($_POST['m_title']) && isset($_POST['m_body'])) {
         $m_title = $_POST['m_title'];
@@ -111,24 +88,30 @@ if (isset($_POST['submit'])) {
             'meta_title' => $m_title,
             'meta_desc' => $m_body,
             'meta_keyword' => $m_keywords,
-            'post_id' => $post_Id,
+            'post_id' => $unique_id_for_all,
             'status' => 1,
         );
 
-        $metaData_Id = $fun->insertLastInsertId('meta_data', $m_param);
+        $fun->insert('meta_data', $m_param);
     }
 
+    if (isset($_POST['p_title']) && isset($_POST['p_body'])) {
+        $p_title = $_POST['p_title'];
+        $p_body = $_POST['p_body'];
 
-    if (!empty($post_Id) && !empty($schemaData_Id) && !empty($metaData_Id)) {
-        $update_Post_params = array(
-            'meta_data_id' => $metaData_Id,
-            'job_schema_id' => $schemaData_Id,
+        $p_param = array(
+            'cat_id' => $cat_id,
+            'sub_cat_id' => $sub_cat_id,
+            'user_id' => 1, // replace with user $_SESSION['id']
+            'meta_data_id' => $unique_id_for_all,
+            'job_schema_id' => $unique_id_for_all,
+            'tag_id' => $unique_id_for_all,
+            'title' => $p_title,
+            'body' => $p_body,
+            'status' => 1
         );
-        if ($fun->update('post', $update_Post_params, $post_Id)) {
-            echo "Data Inserted";
-        } else {
-            echo "Data Not Inserted";
-        }
+
+        $fun->insert('post', $p_param);
     }
 }
 
@@ -153,8 +136,7 @@ if (isset($_POST['submit'])) {
                                     <div class="form-group mb-4">
                                         <label for="title">Title</label>
                                         <div class="input-group">
-                                            <input type="text" name="p_title" class="form-control"
-                                                placeholder="Jobs in Delhi" id="title" autofocus required>
+                                            <input type="text" name="p_title" class="form-control" placeholder="Jobs in Delhi" id="title" autofocus required>
                                         </div>
                                     </div>
 
@@ -171,8 +153,7 @@ if (isset($_POST['submit'])) {
                                     <div class="form-group mb-4">
                                         <label for="title">Meta Title</label>
                                         <div class="input-group">
-                                            <input type="text" name="m_title" class="form-control"
-                                                placeholder="Jobs in Delhi" id="title" autofocus>
+                                            <input type="text" name="m_title" class="form-control" placeholder="Jobs in Delhi" id="title" autofocus>
                                         </div>
                                     </div>
                                     <div class="form-group mb-4">
@@ -192,8 +173,7 @@ if (isset($_POST['submit'])) {
                                     <div class="form-group mb-4">
                                         <label for="title">Schema Title</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_title" class="form-control"
-                                                placeholder="Jobs in Delhi" id="title" autofocus>
+                                            <input type="text" name="s_title" class="form-control" placeholder="Jobs in Delhi" id="title" autofocus>
                                         </div>
                                     </div>
 
@@ -206,48 +186,50 @@ if (isset($_POST['submit'])) {
                                     <div class="form-group mb-4">
                                         <label for="title">Salary Currency</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_currency" class="form-control" placeholder="INR"
-                                                value="INR" id="title" autofocus>
+                                            <input type="text" name="s_currency" class="form-control" placeholder="INR" value="INR" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Salary</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_salary" class="form-control" placeholder="10,000"
-                                                id="title" autofocus>
+                                            <input type="text" name="s_salary" class="form-control" placeholder="10,000" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Payroll Time</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_payroll_time" class="form-control"
-                                                placeholder="Montly" id="title" autofocus>
+                                            <input type="text" name="s_payroll_time" class="form-control" placeholder="Montly" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Posted Date</label>
                                         <div class="input-group">
-                                            <input type="date" name="s_posted_date" class="form-control" id="title"
-                                                autofocus>
+                                            <input type="date" name="s_posted_date" class="form-control" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Expiry Date</label>
                                         <div class="input-group">
-                                            <input type="date" name="s_expiry_date" class="form-control" id="title"
-                                                autofocus>
+                                            <input type="date" name="s_expiry_date" class="form-control" id="title" autofocus>
                                         </div>
+                                    </div>
+
+                                    <div class="form-check mb-4">
+
+                                        <input type="checkbox" name="s_unpublish_when_expiry" class="form-check-input" id="exampleCheck1">
+                                        <label class="form-check-label" for="exampleCheck1">Unpublish When
+                                            Expiry</label>
+
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Employment Type</label>
                                         <div class="form-check">
-                                            <input type="checkbox" name="s_emp_type_full_time" class="form-check-input"
-                                                id="exampleCheck1">
+                                            <input type="checkbox" name="s_emp_type_full_time" class="form-check-input" id="exampleCheck1">
                                             <label class="form-check-label" for="exampleCheck1">Full Time</label>
                                         </div>
                                     </div>
@@ -255,38 +237,33 @@ if (isset($_POST['submit'])) {
                                     <div class="form-group mb-4">
                                         <label for="title">Hiring Organization Name</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_hiring_org_name" class="form-control" id="title"
-                                                autofocus>
+                                            <input type="text" name="s_hiring_org_name" class="form-control" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Hiring Organization URL</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_hiring_org_url" class="form-control" id="title"
-                                                autofocus>
+                                            <input type="text" name="s_hiring_org_url" class="form-control" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Hiring Organization Logo</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_hiring_org_logo" class="form-control" id="title"
-                                                autofocus>
+                                            <input type="text" name="s_hiring_org_logo" class="form-control" id="title" autofocus>
                                         </div>
                                     </div>
 
                                     <div class="form-group mb-4">
                                         <label for="title">Job Posting Unique Id</label>
                                         <div class="input-group">
-                                            <input type="text" name="s_job_posting_unique_id" class="form-control"
-                                                id="title" autofocus>
+                                            <input type="text" name="s_job_posting_unique_id" class="form-control" id="title" autofocus>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="inputAddress">Street Address</label>
-                                        <input type="text" class="form-control" name="s_street_address"
-                                            id="inputAddress" placeholder="1234 Main St">
+                                        <input type="text" class="form-control" name="s_street_address" id="inputAddress" placeholder="1234 Main St">
                                     </div>
 
                                     <div class="form-group">
@@ -325,7 +302,7 @@ if (isset($_POST['submit'])) {
 
                                     if (isset($allCat) && !empty($allCat)) {
                                         foreach ($allCat as $key => $value) { ?>
-                                    <option value="<?= $value['id']; ?>"><?= $value['cat_name']; ?></option>
+                                            <option value="<?= $value['id']; ?>"><?= $value['cat_name']; ?></option>
                                     <?php }
                                     }
 
@@ -338,14 +315,13 @@ if (isset($_POST['submit'])) {
 
                             <div class="form-group mb-4">
                                 <label>Select Sub Category</label>
-                                <select class="form-select" name="sub_cat_id" aria-label="Default select example"
-                                    required>
+                                <select class="form-select" name="sub_cat_id" aria-label="Default select example" required>
 
                                     <?php
 
                                     if (isset($subCat) && !empty($subCat)) {
                                         foreach ($subCat as $key => $value) { ?>
-                                    <option value="<?= $value['id']; ?>"><?= $value['sub_cat_name']; ?></option>
+                                            <option value="<?= $value['id']; ?>"><?= $value['sub_cat_name']; ?></option>
                                     <?php }
                                     }
 
