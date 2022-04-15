@@ -13,66 +13,95 @@ $subCat = $fun->showAllData('sub_category');
 
 
 if (isset($_POST['submit'])) {
-    // echo "<pre>";
-    //print_r($_POST);
+    $unique_id_for_all = uniqid() . time();
+    if (isset($_POST['s_title']) && isset($_POST['s_body'])) {
+        $s_title = $_POST['s_title'];
+        $s_body = $_POST['s_body'];
+        $s_currency = $_POST['s_currency'];
+        $s_salary = $_POST['s_salary'];
+        $s_payroll_time = $_POST['s_payroll_time'];
+        $s_posted_date = $_POST['s_posted_date'];
+        $s_expiry_date = $_POST['s_expiry_date'];
+        $s_unpublish_when_expiry = $_POST['s_unpublish_when_expiry'];
+        $s_emp_type_full_time = $_POST['s_emp_type_full_time'];
+        $s_hiring_org_name = $_POST['s_hiring_org_name'];
+        $s_hiring_org_url = $_POST['s_hiring_org_url'];
+        $s_hiring_org_logo = $_POST['s_hiring_org_logo'];
+        $s_job_posting_unique_id = $_POST['s_job_posting_unique_id'];
+        $s_street_address = $_POST['s_street_address'];
+        $s_city_name = $_POST['s_city_name'];
+        $s_region = $_POST['s_region'];
+        $s_zip_code = $_POST['s_zip_code'];
+        $s_country = $_POST['s_country'];
+
+
+        $s_param = array(
+
+            'post_id' => $unique_id_for_all,
+            'title' => $s_title,
+            'body' => $s_body,
+            'sal_currency' => $s_currency,
+            'salary' => $s_salary,
+            'payroll_time' => $s_payroll_time,
+            'posted_date' => $s_posted_date,
+            'expiry_date' => $s_expiry_date,
+            'unpublish_when_exp' => $s_unpublish_when_expiry,
+            'emp_type' => $s_emp_type_full_time,
+            'hiring_rog_name' => $s_hiring_org_name,
+            'org_url' => $s_hiring_org_url,
+            'org_logo' => $s_hiring_org_logo,
+            'unique_id' => $s_job_posting_unique_id,
+            'street_address' => $s_street_address,
+            'locality' => $s_city_name,
+            'region' => $s_region,
+            'postal_code' => $s_zip_code,
+            'country' => $s_country,
+            'status' => 1
+        );
+        $fun->insert('job_posting_schema', $s_param);
+    }
+
+
+    if (isset($_POST['cat_id']) && isset($_POST['sub_cat_id'])) {
+        $cat_id = $_POST['cat_id'];
+        $sub_cat_id = $_POST['sub_cat_id'];
+    }
+
+    if (isset($_POST['m_title']) && isset($_POST['m_body'])) {
+        $m_title = $_POST['m_title'];
+        $m_body = $_POST['m_body'];
+        $m_keywords = $_POST['m_keywords'];
+
+        $m_param = array(
+            'meta_title' => $m_title,
+            'meta_desc' => $m_body,
+            'meta_keyword' => $m_keywords,
+            'post_id' => $unique_id_for_all,
+            'status' => 1,
+        );
+
+        $fun->insert('meta_data', $p_param);
+    }
+
+    if (isset($_POST['p_title']) && isset($_POST['p_body'])) {
+        $p_title = $_POST['p_title'];
+        $p_body = $_POST['p_body'];
+
+        $p_param = array(
+            'cat_id' => $cat_id,
+            'sub_cat_id' => $sub_cat_id,
+            'user_id' => 1, // replace with user $_SESSION['id']
+            'meta_data_id' => $unique_id_for_all,
+            'job_schema_id' => $unique_id_for_all,
+            'tag_id' => $unique_id_for_all,
+            'title' => $p_title,
+            'body' => $p_body,
+            'status' => 1
+        );
+
+        $fun->insert('post', $p_param);
+    }
 }
-
-
-if (isset($_POST['s_title']) && isset($_POST['s_body'])) {
-    $s_title = $_POST['s_title'];
-    $s_body = $_POST['s_body'];
-    $s_currency = $_POST['s_currency'];
-    $s_salary = $_POST['s_salary'];
-    $s_payroll_time = $_POST['s_payroll_time'];
-    $s_posted_date = $_POST['s_posted_date'];
-    $s_expiry_date = $_POST['s_expiry_date'];
-    $s_unpublish_when_expiry = $_POST['s_unpublish_when_expiry'];
-    $s_emp_type_full_time = $_POST['s_emp_type_full_time'];
-    $s_hiring_org_name = $_POST['s_hiring_org_name'];
-    $s_hiring_org_url = $_POST['s_hiring_org_url'];
-    $s_hiring_org_logo = $_POST['s_hiring_org_logo'];
-    $s_street_address = $_POST['s_street_address'];
-    $s_city_name = $_POST['s_city_name'];
-    $s_region = $_POST['s_region'];
-    $s_country = $_POST['s_country'];
-}
-
-
-
-
-
-/**
- * Array
-(
-    [p_title] => Jobs in Mumbai
-    [p_body] => Mumbai Jobs Hai Bhai
-    [m_title] => Jobs in Mumbai
-    [m_body] => Mumbai Jobs Hai Bhai
-    [m_keywords] => jobs in mumbai, mumbai jobs,
-    [s_title] => Jobs in Mumbai
-    [s_body] => Mumbai Jobs Hai Bhai
-    [s_currency] => INR
-    [s_salary] => 25000
-    [s_payroll_time] => Monthly
-    [s_posted_date] => 2022-04-11
-    [s_expiry_date] => 2022-05-11
-    [s_unpublish_when_expiry] => on
-    [s_emp_type_full_time] => on
-    [s_hiring_org_name] => Sarkari Result Brt
-    [s_hiring_org_url] => abc.com
-    [s_hiring_org_logo] => abc.com/logo.png
-    [s_job_posting_unique_id] => 10
-    [s_street_address] => 12-190 gali maliyan patti chaudran
-    [s_name] => Baraut
-    [s_region] => Uttar Pradesh
-    [s_zip_code] => 250611
-    [s_country] => India
-    [cat_id] => 8
-    [sub_cat_id] => 1
-    [submit] => 
-)
-
- */
 
 
 
